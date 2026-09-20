@@ -15,9 +15,19 @@ const envolverEn = (etiqueta, hijo, clase = '') => {
   return padre;
 };
 
-export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
+/* Tres niveles en vez de un interruptor: ALTO para quien quiere la maquina
+   vieja entera, MEDIO para leer comodo, OFF para quien solo quiere el texto.
+   Se exporta para que js/main.js use el mismo arreglo (mismo indice = mismo
+   valor y etiqueta) en vez de duplicar el valor por defecto en otro archivo. */
+export const NIVELES_CRT = [
+  { valor: '1',   etiqueta: 'CRT: ALTO' },
+  { valor: '0.7', etiqueta: 'CRT: MEDIO' },
+  { valor: '0',   etiqueta: 'CRT: OFF' },
+];
+
+export function montarTUI({ contenedor, contenido, idioma, seccionActual = null, nivelCrt = 0, alCambiarIdioma }) {
   const ids = contenido.secciones.map((s) => s.id);
-  let estado = crearEstado(ids);
+  let estado = crearEstado(ids, seccionActual);
 
   contenedor.innerHTML = '';
   const raiz = crear('div', 'sistema');
@@ -45,10 +55,12 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
   panel.id = 'panel';
   panel.setAttribute('role', 'region');
   panel.setAttribute('aria-live', 'polite');
-  // tabindex -1: no entra en el orden de Tab, pero sirve de destino de foco de
-  // respaldo cuando el panel se reconstruye y no hay un elemento mas especifico
-  // al que devolver el foco (ver render()).
-  panel.tabIndex = -1;
+  // tabindex 0 (no -1): entra en el orden de Tab y ademas queda como
+  // destino de foco de respaldo cuando el panel se reconstruye y no hay un
+  // elemento mas especifico al que devolver el foco (ver render()). Con -1
+  // el panel era focuseable por script pero Firefox no le mandaba PageDown
+  // ni Space para scrollearlo si el foco quedaba ahi.
+  panel.tabIndex = 0;
   raiz.append(panel);
 
   // --- Barra de estado
@@ -57,23 +69,20 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     idioma === 'es' ? '↑↓ mover · ←→ seccion · ENTER abrir · ESC volver'
                     : '↑↓ move · ←→ section · ENTER open · ESC back');
   const controles = crear('div');
+  let indiceCrt = nivelCrt;   // indice dentro de NIVELES_CRT; por defecto ALTO
   const botonIdioma = crear('button', '', idioma === 'es' ? 'ES / en' : 'es / EN');
   botonIdioma.type = 'button';
-  botonIdioma.addEventListener('click', () => alCambiarIdioma(idioma === 'es' ? 'en' : 'es'));
-  /* Tres niveles en vez de un interruptor: ALTO para quien quiere la maquina
-     vieja entera, MEDIO para leer comodo, OFF para quien solo quiere el texto. */
-  const NIVELES_CRT = [
-    { valor: '1',   etiqueta: 'CRT: ALTO' },
-    { valor: '0.7', etiqueta: 'CRT: MEDIO' },
-    { valor: '0',   etiqueta: 'CRT: OFF' },
-  ];
-  let nivelCrt = 0;   // arranca en ALTO
-  const botonCrt = crear('button', '', NIVELES_CRT[nivelCrt].etiqueta);
+  // Se manda la seccion y el nivel de CRT actuales: alCambiarIdioma remonta
+  // toda la TUI desde cero (ver js/main.js), y sin esto el lector perdia su
+  // lugar (volvia a WHOAMI) y el CRT volvia a ALTO cada vez que cambiaba de
+  // idioma.
+  botonIdioma.addEventListener('click', () => alCambiarIdioma(idioma === 'es' ? 'en' : 'es', estado.seccion, indiceCrt));
+  const botonCrt = crear('button', '', NIVELES_CRT[indiceCrt].etiqueta);
   botonCrt.type = 'button';
   botonCrt.addEventListener('click', () => {
-    nivelCrt = (nivelCrt + 1) % NIVELES_CRT.length;
-    document.documentElement.style.setProperty('--crt', NIVELES_CRT[nivelCrt].valor);
-    botonCrt.textContent = NIVELES_CRT[nivelCrt].etiqueta;
+    indiceCrt = (indiceCrt + 1) % NIVELES_CRT.length;
+    document.documentElement.style.setProperty('--crt', NIVELES_CRT[indiceCrt].valor);
+    botonCrt.textContent = NIVELES_CRT[indiceCrt].etiqueta;
   });
   controles.append(botonIdioma, botonCrt);
   estadoBarra.append(teclas, controles);
@@ -87,12 +96,19 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     return [];
   }
 
+  // Devuelve si la accion realmente cambio el estado (y por lo tanto
+  // re-renderizo). Quien dispara la accion desde una tecla lo usa para saber
+  // si debe suprimir el comportamiento nativo del navegador (evento.
+  // preventDefault()): si no paso nada, no hay que suprimir nada, y asi el
+  // scroll nativo con las flechas sigue funcionando en las secciones sin
+  // items (todas salvo "archivos") y dentro de un detalle abierto.
   function aplicar(accion) {
-    if (!accion) return;
+    if (!accion) return false;
     const siguiente = reducir(estado, accion, { cantidadItems: itemsDeSeccion().length });
-    if (siguiente === estado) return;
+    if (siguiente === estado) return false;
     estado = siguiente;
     render();
+    return true;
   }
 
   function render() {
@@ -117,7 +133,7 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     // foco en algun lado dentro del panel, no lo tocamos. Si no, y el foco
     // estaba en el panel antes de reconstruirlo, lo recuperamos: primero el
     // item resaltado (si existe), si no el primer elemento enfocable, y si no
-    // el panel mismo (con tabindex -1) como ultimo recurso.
+    // el panel mismo (con tabindex 0) como ultimo recurso.
     if (teniaFocoEnPanel && !panel.contains(document.activeElement)) {
       const objetivo = panel.querySelector('[data-foco="true"]')
         ?? panel.querySelector('button, a, [tabindex]')
@@ -239,7 +255,7 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
       return;
     }
     const accion = accionDesdeTecla(evento.key, estado);
-    if (accion) { evento.preventDefault(); aplicar(accion); }
+    if (accion && aplicar(accion)) evento.preventDefault();
   };
   document.addEventListener('keydown', alTeclado);
 

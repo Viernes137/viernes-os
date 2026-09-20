@@ -1,10 +1,14 @@
 import contenido from './contenido.js';
 import { detectarIdioma } from './i18n.js';
 import { ejecutarArranque, CLAVE_VISITADO } from './boot.js';
-import { montarTUI } from './tui.js';
+import { montarTUI, NIVELES_CRT } from './tui.js';
 
 const CLAVE_IDIOMA = 'viernes-os:idioma';
-const NIVEL_CRT_POR_DEFECTO = '1';
+// El indice 0 (CRT: ALTO) es el nivel de arranque. Se toma el valor de
+// NIVELES_CRT (definido una sola vez en js/tui.js) en vez de duplicarlo
+// aqui, para que no se puedan desincronizar la etiqueta del boton y el
+// valor real de --crt.
+const INDICE_CRT_POR_DEFECTO = 0;
 
 const leer = (clave) => { try { return localStorage.getItem(clave); } catch { return null; } };
 const guardar = (clave, valor) => { try { localStorage.setItem(clave, valor); } catch { /* modo privado */ } };
@@ -23,9 +27,12 @@ document.documentElement.lang = idioma;
 const faseArranque = document.getElementById('fase-arranque');
 const faseSistema = document.getElementById('fase-sistema');
 
-function entrarAlSistema() {
+// seccionActual/indiceCrt viajan de un montaje al siguiente: sin esto, cada
+// vez que alCambiarIdioma remontaba la TUI desde cero, el lector volvia a
+// WHOAMI y el CRT volvia a ALTO sin importar donde estuviera parado.
+function entrarAlSistema(seccionActual = null, indiceCrt = INDICE_CRT_POR_DEFECTO) {
   document.documentElement.lang = idioma;
-  document.documentElement.style.setProperty('--crt', NIVEL_CRT_POR_DEFECTO);
+  document.documentElement.style.setProperty('--crt', NIVELES_CRT[indiceCrt].valor);
   faseArranque.hidden = true;
   faseSistema.hidden = false;
   if (tui) tui.destruir();
@@ -33,10 +40,12 @@ function entrarAlSistema() {
     contenedor: faseSistema,
     contenido,
     idioma,
-    alCambiarIdioma(nuevo) {
+    seccionActual,
+    nivelCrt: indiceCrt,
+    alCambiarIdioma(nuevo, seccion, nivelCrt) {
       idioma = nuevo;
       guardar(CLAVE_IDIOMA, nuevo);
-      entrarAlSistema();
+      entrarAlSistema(seccion, nivelCrt);
     },
   });
 }
