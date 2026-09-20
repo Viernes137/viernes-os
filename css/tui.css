@@ -57,8 +57,12 @@
   cursor: pointer; padding: 0.25rem 0.5rem;
   min-height: 44px;
 }
-.barra-estado button:hover, .barra-estado button:focus-visible {
-  color: var(--fosforo); border-color: var(--fosforo-tenue); outline: none;
+.barra-estado button:hover {
+  color: var(--fosforo); border-color: var(--fosforo-tenue);
+}
+.barra-estado button:focus-visible {
+  color: var(--fosforo); border-color: var(--fosforo-tenue);
+  outline: 2px solid var(--acento);
 }
 
 .lista-archivos { list-style: none; margin: 0; padding: 0; }
@@ -82,7 +86,18 @@
 .detalle { border: 1px solid var(--acento); padding: 1rem; }
 .detalle .stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
 .detalle .stack span { border: 1px solid var(--fosforo-tenue); padding: 0.15rem 0.5rem; font-size: 0.8rem; }
-.detalle a { color: var(--acento); }
+
+/* Todo enlace dentro del panel (el de un detalle de archivo, los de
+   LinkedIn/GitHub en CONTACTO) usa el acento, no el azul por defecto del
+   navegador: sobre --fondo, el azul da 2.12:1 (1.81:1 visitado) y el
+   acento da 7.39:1. inline-flex + min-height da un area tactil de 44px sin
+   forzar el interlineado del texto que envuelve. */
+.panel a {
+  color: var(--acento);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 
 .proceso { border-left: 2px solid var(--fosforo-tenue); padding-left: 0.9rem; margin-bottom: 1.2rem; }
 .proceso .estado { color: var(--ambar); font-size: 0.8rem; }
