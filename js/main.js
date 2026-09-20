@@ -4,6 +4,7 @@ import { ejecutarArranque, CLAVE_VISITADO } from './boot.js';
 import { montarTUI } from './tui.js';
 
 const CLAVE_IDIOMA = 'viernes-os:idioma';
+const NIVEL_CRT_POR_DEFECTO = '0.7';
 
 const leer = (clave) => { try { return localStorage.getItem(clave); } catch { return null; } };
 const guardar = (clave, valor) => { try { localStorage.setItem(clave, valor); } catch { /* modo privado */ } };
@@ -24,7 +25,7 @@ const faseSistema = document.getElementById('fase-sistema');
 
 function entrarAlSistema() {
   document.documentElement.lang = idioma;
-  document.documentElement.style.setProperty('--crt', '0.35');
+  document.documentElement.style.setProperty('--crt', NIVEL_CRT_POR_DEFECTO);
   faseArranque.hidden = true;
   faseSistema.hidden = false;
   if (tui) tui.destruir();

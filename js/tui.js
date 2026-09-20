@@ -60,13 +60,20 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
   const botonIdioma = crear('button', '', idioma === 'es' ? 'ES / en' : 'es / EN');
   botonIdioma.type = 'button';
   botonIdioma.addEventListener('click', () => alCambiarIdioma(idioma === 'es' ? 'en' : 'es'));
-  const botonCrt = crear('button', '', 'CRT: ON');
+  /* Tres niveles en vez de un interruptor: ALTO para quien quiere la maquina
+     vieja entera, MEDIO para leer comodo, OFF para quien solo quiere el texto. */
+  const NIVELES_CRT = [
+    { valor: '1',   etiqueta: 'CRT: ALTO' },
+    { valor: '0.7', etiqueta: 'CRT: MEDIO' },
+    { valor: '0',   etiqueta: 'CRT: OFF' },
+  ];
+  let nivelCrt = 1;
+  const botonCrt = crear('button', '', NIVELES_CRT[nivelCrt].etiqueta);
   botonCrt.type = 'button';
-  let crtEncendido = true;
   botonCrt.addEventListener('click', () => {
-    crtEncendido = !crtEncendido;
-    document.documentElement.style.setProperty('--crt', crtEncendido ? '0.35' : '0');
-    botonCrt.textContent = crtEncendido ? 'CRT: ON' : 'CRT: OFF';
+    nivelCrt = (nivelCrt + 1) % NIVELES_CRT.length;
+    document.documentElement.style.setProperty('--crt', NIVELES_CRT[nivelCrt].valor);
+    botonCrt.textContent = NIVELES_CRT[nivelCrt].etiqueta;
   });
   controles.append(botonIdioma, botonCrt);
   estadoBarra.append(teclas, controles);
