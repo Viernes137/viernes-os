@@ -742,7 +742,9 @@ Acá aparece la pantalla por primera vez. Sin contenido todavía: la máquina, e
 - Produces:
   - Variable CSS `--crt` en `:root` — escala global de intensidad. `1` arranque, `0.35` sistema, `0` apagado.
   - Clases: `.pantalla` (contenedor con curvatura), `.capa-scanlines`, `.capa-vineta`, `.apagando` (animación de apagado de CRT).
-  - Estructura HTML: `#pantalla`, `#fase-arranque`, `#fase-sistema`, `#barra-estado`.
+  - Estructura HTML: `#pantalla`, `#fase-arranque`, `#fase-sistema`. La barra
+    de estado NO es markup estático: `montarTUI` (Task 6) la crea como
+    `<footer class="barra-estado">` dentro de `#fase-sistema`.
 
 - [ ] **Step 1: Escribir `index.html`**
 
