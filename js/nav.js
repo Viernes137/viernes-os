@@ -25,6 +25,12 @@ export function reducir(estado, accion, contexto = {}) {
       return { ...estado, seccion: estado.secciones[siguiente], indice: 0, abierto: null };
     }
     case 'item-delta': {
+      // Sin items que recorrer (toda seccion salvo "archivos") no hay nada
+      // que mover: devolver el mismo estado deja que quien disparo la accion
+      // (una flecha de teclado) sepa que no paso nada y no interfiera con el
+      // scroll nativo del navegador. Lo mismo si hay un detalle abierto: las
+      // flechas no deben re-renderizar por debajo del detalle.
+      if (cantidadItems <= 0 || estado.abierto !== null) return estado;
       return { ...estado, indice: envolver(estado.indice + accion.delta, cantidadItems) };
     }
     case 'abrir': {

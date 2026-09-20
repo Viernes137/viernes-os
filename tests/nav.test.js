@@ -56,6 +56,21 @@ test('item-delta sin items no rompe', () => {
   assert.equal(e.indice, 0);
 });
 
+test('item-delta sin items devuelve el mismo estado (identidad)', () => {
+  // La identidad, no solo el valor, importa: es lo que le permite a
+  // aplicar() en tui.js saber que no hubo re-render y dejar que el
+  // navegador scrollee de forma nativa en las secciones sin items.
+  const e = nuevo();
+  assert.equal(reducir(e, { tipo: 'item-delta', delta: 1 }, { cantidadItems: 0 }), e);
+});
+
+test('item-delta con un detalle abierto devuelve el mismo estado (identidad)', () => {
+  let e = reducir(nuevo(), { tipo: 'seccion', id: 'archivos' });
+  e = reducir(e, { tipo: 'abrir', id: 'plantasia' }, { cantidadItems: 6 });
+  const siguiente = reducir(e, { tipo: 'item-delta', delta: 1 }, { cantidadItems: 6 });
+  assert.equal(siguiente, e);
+});
+
 test('abrir y cerrar un archivo', () => {
   let e = reducir(nuevo(), { tipo: 'seccion', id: 'archivos' });
   e = reducir(e, { tipo: 'abrir', id: 'plantasia' });
