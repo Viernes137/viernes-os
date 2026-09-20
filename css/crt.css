@@ -1,0 +1,122 @@
+:root {
+  /* Intensidad global de los efectos CRT. 1 = arranque, 0.35 = sistema, 0 = apagado. */
+  --crt: 1;
+
+  --fondo: #050a08;
+  --fosforo: #6bffc8;
+  --fosforo-tenue: #3d8f74;
+  --acento: #ff5ed2;
+  --ambar: #ffcc66;
+
+  --fuente: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  --glow: calc(var(--crt) * 8px);
+  --opacidad-scanlines: calc(var(--crt) * 0.28);
+  --curvatura: calc(var(--crt) * 0.9deg);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: var(--fosforo);
+  font-family: var(--fuente);
+  font-size: 16px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+
+.pantalla {
+  position: relative;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, #0a1512 0%, var(--fondo) 70%, #010403 100%);
+  overflow: hidden;
+  transform: perspective(1400px) rotateX(var(--curvatura));
+  transition: transform 1.2s ease, filter 1.2s ease;
+}
+
+.contenido {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  overflow: auto;
+  text-shadow: 0 0 var(--glow) rgba(107, 255, 200, calc(var(--crt) * 0.7));
+}
+
+/* Scanlines: lineas horizontales del tubo. */
+.capa-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: var(--opacidad-scanlines);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.45) 0px,
+    rgba(0, 0, 0, 0.45) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Vineta: el tubo se oscurece en los bordes. */
+.capa-vineta {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: var(--crt);
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* Parpadeo sutil del fosforo. */
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  97%      { opacity: 1; }
+  98%      { opacity: calc(1 - var(--crt) * 0.12); }
+  99%      { opacity: 1; }
+}
+.pantalla { animation: parpadeo 6s infinite steps(1); }
+
+/* Apagado de CRT: la imagen se aplasta a una linea y se va a un punto. */
+@keyframes apagado {
+  0%   { transform: scale(1, 1);       opacity: 1; filter: brightness(1); }
+  45%  { transform: scale(1, 0.012);   opacity: 1; filter: brightness(3); }
+  70%  { transform: scale(0.28, 0.008); opacity: 1; filter: brightness(4); }
+  100% { transform: scale(0, 0);       opacity: 0; filter: brightness(6); }
+}
+.apagando { animation: apagado 700ms ease-in forwards; }
+
+/* Aberracion cromatica: el haz no converge perfecto en los bordes. */
+.contenido::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: calc(var(--crt) * 0.35);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 94, 210, 0.10) 0%,
+    transparent 8%,
+    transparent 92%,
+    rgba(107, 200, 255, 0.10) 100%
+  );
+}
+
+.cursor::after {
+  content: "\2588";
+  animation: latido 1s steps(2) infinite;
+}
+@keyframes latido { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* Nadie deberia marearse leyendo un portafolio. */
+@media (prefers-reduced-motion: reduce) {
+  .pantalla, .apagando, .cursor::after { animation: none !important; }
+  .pantalla { transform: none; transition: none; }
+  .apagando { opacity: 0; }
+}
