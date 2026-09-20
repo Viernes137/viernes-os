@@ -1,0 +1,6 @@
+name = "viernes-os"
+compatibility_date = "2025-09-19"
+
+[assets]
+directory = "."
+not_found_handling = "single-page-application"
