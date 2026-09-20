@@ -67,7 +67,7 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     { valor: '0.7', etiqueta: 'CRT: MEDIO' },
     { valor: '0',   etiqueta: 'CRT: OFF' },
   ];
-  let nivelCrt = 1;
+  let nivelCrt = 0;   // arranca en ALTO
   const botonCrt = crear('button', '', NIVELES_CRT[nivelCrt].etiqueta);
   botonCrt.type = 'button';
   botonCrt.addEventListener('click', () => {

@@ -11,9 +11,9 @@
 
   --fuente: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 
-  /* El glow es el unico efecto que degrada la lectura, asi que crece mas
-     despacio que el resto: el caracter lo ponen las scanlines y la curvatura. */
-  --glow: calc(var(--crt) * 6px);
+  /* Radio del halo de fosforo. Se aplica en dos capas (nucleo + halo) para que
+     las letras se vean encendidas y no solo borrosas. */
+  --glow: calc(var(--crt) * 14px);
   --opacidad-scanlines: calc(var(--crt) * 0.42);
   --curvatura: calc(var(--crt) * 1.5deg);
 }
@@ -45,9 +45,15 @@ html, body {
   position: relative;
   z-index: 2;
   height: 100%;
-  padding: clamp(1rem, 3vw, 2.5rem);
+  /* Pantalla completa con 5% de aire a cada lado; nunca menos de 16px. */
+  padding: max(1rem, 5vw) max(1rem, 5vw);
   overflow: auto;
-  text-shadow: 0 0 var(--glow) rgba(107, 255, 200, calc(var(--crt) * 0.7));
+  /* Dos capas: un nucleo apretado que enciende la letra, y un halo amplio
+     que la derrama sobre el fondo, como el fosforo de un tubo real. */
+  text-shadow:
+    0 0 calc(var(--glow) * 0.22) rgba(150, 255, 216, calc(var(--crt) * 0.95)),
+    0 0 calc(var(--glow) * 0.6)  rgba(107, 255, 200, calc(var(--crt) * 0.65)),
+    0 0 var(--glow)              rgba(107, 255, 200, calc(var(--crt) * 0.35));
 }
 
 /* Scanlines: lineas horizontales del tubo. */

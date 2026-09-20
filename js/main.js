@@ -4,7 +4,7 @@ import { ejecutarArranque, CLAVE_VISITADO } from './boot.js';
 import { montarTUI } from './tui.js';
 
 const CLAVE_IDIOMA = 'viernes-os:idioma';
-const NIVEL_CRT_POR_DEFECTO = '0.7';
+const NIVEL_CRT_POR_DEFECTO = '1';
 
 const leer = (clave) => { try { return localStorage.getItem(clave); } catch { return null; } };
 const guardar = (clave, valor) => { try { localStorage.setItem(clave, valor); } catch { /* modo privado */ } };
