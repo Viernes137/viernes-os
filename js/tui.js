@@ -104,7 +104,7 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     panel.innerHTML = '';
     const seccion = contenido.secciones.find((s) => s.id === estado.seccion);
     panel.append(crear('h2', '', t(seccion.etiqueta, idioma)));
-    RENDERS[estado.seccion](panel);
+    RENDERIZADORES[estado.seccion](panel);
 
     // Si el render de la seccion (por ejemplo, abrir un archivo) ya puso el
     // foco en algun lado dentro del panel, no lo tocamos. Si no, y el foco
@@ -119,7 +119,7 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
     }
   }
 
-  const RENDERS = {
+  const RENDERIZADORES = {
     whoami(destino) {
       destino.append(crear('p', '', `${contenido.whoami.nombre} — ${t(contenido.whoami.ubicacion, idioma)}`));
       for (const parrafo of contenido.whoami.parrafos) destino.append(crear('p', '', t(parrafo, idioma)));
@@ -213,13 +213,20 @@ export function montarTUI({ contenedor, contenido, idioma, alCambiarIdioma }) {
   const alTeclado = (evento) => {
     if (evento.target.matches('input, textarea')) return;
     if (evento.key === 'Enter' && estado.seccion === 'archivos' && !estado.abierto) {
-      // Si el foco real ya esta sobre un boton de la lista (llegado con Tab),
-      // ese boton va a recibir su propio click nativo por este mismo Enter:
-      // lo dejamos responder a el para no abrir un archivo distinto del que
-      // el visitante realmente tiene enfocado (y para no contestar dos veces
-      // la misma tecla, como en la puerta de arranque).
-      const enfocadoEsItemDeLista = evento.target.closest('.lista-archivos button') !== null;
-      if (enfocadoEsItemDeLista) return;
+      // El atajo de indice (abrir el item resaltado con Enter) solo debe
+      // actuar cuando el foco real no tiene nada propio que hacer con Enter:
+      // ni el panel ni el body saben responder un Enter por si mismos. Si el
+      // foco esta sobre CUALQUIER elemento enfocable propio (un boton de la
+      // lista, un boton del menu, el toggle de idioma, el de CRT, un enlace,
+      // etc.), ese elemento va a recibir su propio click nativo por este
+      // mismo Enter: lo dejamos responder a el, para no secuestrarle la tecla
+      // ni contestar dos veces la misma pulsacion (como en la puerta de
+      // arranque). Antes esta guarda solo excluia los botones de la lista de
+      // archivos, lo que dejaba secuestrados los botones del menu y de la
+      // barra de estado mientras la seccion activa era "archivos".
+      const foco = evento.target;
+      const focoNoTieneActivacionPropia = foco === document.body || foco === panel;
+      if (!focoNoTieneActivacionPropia) return;
       const archivo = contenido.archivos[estado.indice];
       if (archivo) { evento.preventDefault(); aplicar({ tipo: 'abrir', id: archivo.id }); }
       return;
