@@ -120,3 +120,44 @@ html, body {
   .pantalla { transform: none; transition: none; }
   .apagando { opacity: 0; }
 }
+
+/* ---------- Fase de arranque ---------- */
+.fase { max-width: 70ch; margin: 0 auto; }
+.linea { white-space: pre-wrap; }
+.linea.tenue { color: var(--fosforo-tenue); font-size: 0.9rem; }
+.saludo { font-size: clamp(1.6rem, 6vw, 3rem); margin: 1.5rem 0; letter-spacing: 0.04em; }
+.rechazo { color: var(--acento); margin-top: 1rem; }
+.reproche { color: var(--fosforo-tenue); font-size: 1.2rem; }
+.concedido { color: var(--ambar); margin-top: 1rem; }
+
+.puerta { margin-top: 2rem; }
+.pregunta { font-size: clamp(1rem, 3vw, 1.4rem); margin: 0 0 1rem; }
+.opciones { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.opcion {
+  font: inherit;
+  color: var(--fosforo);
+  background: transparent;
+  border: 1px solid var(--fosforo-tenue);
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  text-shadow: inherit;
+  min-height: 44px;
+}
+.opcion:hover, .opcion:focus-visible {
+  color: var(--fondo);
+  background: var(--fosforo);
+  outline: none;
+}
+.opcion:focus-visible { box-shadow: 0 0 0 2px var(--acento); }
+
+.saltar {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  font: inherit; font-size: 0.8rem;
+  color: var(--fosforo-tenue);
+  background: transparent; border: none;
+  cursor: pointer; text-decoration: underline;
+  min-height: 44px;
+}
+.saltar:hover, .saltar:focus-visible { color: var(--fosforo); }
