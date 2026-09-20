@@ -4,6 +4,9 @@
 # Worker publica docs/ (que incluye el spec interno con detalles que el
 # portafolio deliberadamente no dice en publico), tests/ y los archivos de
 # configuracion/documentacion del propio repo.
+.git/
+.github/
+node_modules/
 docs/
 tests/
 .superpowers/
