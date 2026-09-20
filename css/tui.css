@@ -32,6 +32,10 @@
   cursor: pointer;
   min-height: 44px;
 }
+
+/* LinkedIn en azul, por ser lo que es. No el azul de marca (#0a66c2, 3.27:1
+   sobre este fondo) ni el del navegador (1.98:1): un azul cielo que se lee. */
+.panel a[href*="linkedin"] { color: var(--azul); }
 .menu button::before { content: "  "; white-space: pre; }
 .menu button[aria-current="true"] { color: var(--fondo); background: var(--fosforo); }
 .menu button[aria-current="true"]::before { content: "> "; }

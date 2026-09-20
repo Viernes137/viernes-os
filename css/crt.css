@@ -12,6 +12,7 @@
      script de contraste del reporte de la ola de arreglos. */
   --fosforo-tenue: #4fa88b;
   --acento: #ff5ed2;
+  --azul: #5ac8fa;    /* solo para LinkedIn; 9.8:1 sobre el fondo */
   --ambar: #ffcc66;
 
   --fuente: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
