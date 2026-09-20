@@ -141,7 +141,13 @@ html, body {
 }
 
 /* ---------- Fase de arranque ---------- */
-.fase { max-width: 70ch; margin: 0 auto; }
+/* El arranque es prosa tecleada (POST + "hello, world"): se lee mejor en
+   una columna angosta y centrada, aunque el monitor sea ancho. */
+#fase-arranque { max-width: 70ch; margin: 0 auto; }
+/* El sistema, en cambio, es una interfaz de ventana completa: debe ocupar
+   todo el ancho disponible dentro del 5% de aire que ya da .contenido, no
+   quedar flotando en una columna de ~70ch con espacio muerto a los lados. */
+#fase-sistema { max-width: none; }
 .linea { white-space: pre-wrap; }
 .linea.tenue { color: var(--fosforo-tenue); font-size: 0.9rem; }
 .saludo { font-size: clamp(1.6rem, 6vw, 3rem); margin: 1.5rem 0; letter-spacing: 0.04em; }
