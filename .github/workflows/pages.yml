@@ -1,0 +1,60 @@
+# Publica en GitHub Pages solo lo que el sitio necesita para correr:
+# index.html, css/ y js/. Este repo es Viernes137/Viernes137.github.io (un
+# repo de usuario), asi que Pages por defecto serviria la rama entera desde
+# la raiz -- incluido docs/, que Jekyll ademas renderizaria como HTML
+# navegable. Este workflow reemplaza ese despliegue por defecto: arma un
+# artefacto que NO incluye docs/, tests/, wrangler.toml ni nada mas del
+# repo, y lo publica con las acciones oficiales de Pages.
+#
+# Esto es configuracion de despliegue, no un build del sitio: el sitio
+# sigue sin build ni dependencias, se sirve tal cual.
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Armar el artefacto publicable (solo index.html, css/ y js/)
+        run: |
+          set -eu
+          rm -rf _site
+          mkdir -p _site
+          cp index.html _site/
+          cp -r css _site/css
+          cp -r js _site/js
+          touch _site/.nojekyll
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir el artefacto
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

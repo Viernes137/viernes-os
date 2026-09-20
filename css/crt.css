@@ -1,0 +1,189 @@
+:root {
+  /* Intensidad global de los efectos CRT. 1 = arranque y nivel ALTO,
+     0.7 = nivel MEDIO (el del sistema), 0 = apagado. */
+  --crt: 1;
+
+  --fondo: #050a08;
+  --fosforo: #6bffc8;
+  /* Levantado desde #3d8f74: ese tono, compuesto con las scanlines (que lo
+     pintan encima incluso en el centro del panel), quedaba en 4.41:1 a
+     crt:1 — por debajo del minimo de 4.5:1 — y es el color del menu sin
+     seleccionar, la barra de estado y las fechas de trayectoria. Ver el
+     script de contraste del reporte de la ola de arreglos. */
+  --fosforo-tenue: #4fa88b;
+  --acento: #ff5ed2;
+  --azul: #5ac8fa;    /* solo para LinkedIn; 9.8:1 sobre el fondo */
+  --ambar: #ffcc66;
+
+  --fuente: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  /* Radio del halo de fosforo. Se aplica en dos capas (nucleo + halo) para que
+     las letras se vean encendidas y no solo borrosas. */
+  --glow: calc(var(--crt) * 14px);
+  --opacidad-scanlines: calc(var(--crt) * 0.42);
+  --curvatura: calc(var(--crt) * 1.5deg);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: var(--fosforo);
+  font-family: var(--fuente);
+  font-size: 16px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+
+.pantalla {
+  position: relative;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, #0a1512 0%, var(--fondo) 70%, #010403 100%);
+  overflow: hidden;
+  transform: perspective(1400px) rotateX(var(--curvatura));
+  transition: transform 1.2s ease, filter 1.2s ease;
+}
+
+.contenido {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  /* Pantalla completa con 5% de aire a cada lado; nunca menos de 16px. */
+  padding: max(1rem, 5vw) max(1rem, 5vw);
+  overflow: auto;
+  /* Dos capas: un nucleo apretado que enciende la letra, y un halo amplio
+     que la derrama sobre el fondo, como el fosforo de un tubo real. */
+  text-shadow:
+    0 0 calc(var(--glow) * 0.22) rgba(150, 255, 216, calc(var(--crt) * 0.95)),
+    0 0 calc(var(--glow) * 0.6)  rgba(107, 255, 200, calc(var(--crt) * 0.65)),
+    0 0 var(--glow)              rgba(107, 255, 200, calc(var(--crt) * 0.35));
+}
+
+/* Scanlines: lineas horizontales del tubo. */
+.capa-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: var(--opacidad-scanlines);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.62) 0px,
+    rgba(0, 0, 0, 0.62) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Vineta: el tubo se oscurece en los bordes. z-index:1, DETRAS de
+   .contenido (z-index:2): asi solo oscurece el fondo que se transparenta a
+   traves del panel, nunca el texto. Con z-index:4 (por encima de todo)
+   oscurecia tambien las letras hacia los bordes, hasta dejar el menu, la
+   barra de estado y "saltar intro" (que usan --fosforo-tenue) por debajo
+   del contraste minimo. */
+.capa-vineta {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--crt);
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* Parpadeo sutil del fosforo. */
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  97%      { opacity: 1; }
+  98%      { opacity: calc(1 - var(--crt) * 0.16); }
+  99%      { opacity: 1; }
+}
+.pantalla { animation: parpadeo 6s infinite steps(1); }
+
+/* Apagado de CRT: la imagen se aplasta a una linea y se va a un punto. */
+@keyframes apagado {
+  0%   { transform: scale(1, 1);       opacity: 1; filter: brightness(1); }
+  45%  { transform: scale(1, 0.012);   opacity: 1; filter: brightness(3); }
+  70%  { transform: scale(0.28, 0.008); opacity: 1; filter: brightness(4); }
+  100% { transform: scale(0, 0);       opacity: 0; filter: brightness(6); }
+}
+.apagando { animation: apagado 700ms ease-in forwards; }
+
+/* Aberracion cromatica: el haz no converge perfecto en los bordes. */
+.contenido::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: calc(var(--crt) * 0.35);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 94, 210, 0.10) 0%,
+    transparent 8%,
+    transparent 92%,
+    rgba(107, 200, 255, 0.10) 100%
+  );
+}
+
+.cursor::after {
+  content: "\2588";
+  animation: latido 1s steps(2) infinite;
+}
+@keyframes latido { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* Nadie deberia marearse leyendo un portafolio. */
+@media (prefers-reduced-motion: reduce) {
+  .pantalla, .apagando, .cursor::after { animation: none !important; }
+  .pantalla { transform: none; transition: none; }
+  .apagando { opacity: 0; }
+}
+
+/* ---------- Fase de arranque ---------- */
+/* El arranque es prosa tecleada (POST + "hello, world"): se lee mejor en
+   una columna angosta y centrada, aunque el monitor sea ancho. */
+#fase-arranque { max-width: 70ch; margin: 0 auto; }
+/* El sistema, en cambio, es una interfaz de ventana completa: debe ocupar
+   todo el ancho disponible dentro del 5% de aire que ya da .contenido, no
+   quedar flotando en una columna de ~70ch con espacio muerto a los lados. */
+#fase-sistema { max-width: none; }
+.linea { white-space: pre-wrap; }
+.linea.tenue { color: var(--fosforo-tenue); font-size: 0.9rem; }
+.saludo { font-size: clamp(1.6rem, 6vw, 3rem); margin: 1.5rem 0; letter-spacing: 0.04em; }
+.rechazo { color: var(--acento); margin-top: 1rem; }
+.reproche { color: var(--fosforo-tenue); font-size: 1.2rem; }
+.concedido { color: var(--ambar); margin-top: 1rem; }
+
+.puerta { margin-top: 2rem; }
+.pregunta { font-size: clamp(1rem, 3vw, 1.4rem); margin: 0 0 1rem; }
+.opciones { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.opcion {
+  font: inherit;
+  color: var(--fosforo);
+  background: transparent;
+  border: 1px solid var(--fosforo-tenue);
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  text-shadow: inherit;
+  min-height: 44px;
+}
+.opcion:hover, .opcion:focus-visible {
+  color: var(--fondo);
+  background: var(--fosforo);
+  outline: none;
+}
+.opcion:focus-visible { box-shadow: 0 0 0 2px var(--acento); }
+
+.saltar {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  font: inherit; font-size: 0.8rem;
+  color: var(--fosforo-tenue);
+  background: transparent; border: none;
+  cursor: pointer; text-decoration: underline;
+  min-height: 44px;
+}
+.saltar:hover, .saltar:focus-visible { color: var(--fosforo); }

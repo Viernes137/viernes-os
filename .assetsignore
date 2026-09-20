@@ -1,0 +1,13 @@
+# Wrangler no sube a Cloudflare Workers (static assets) nada que matchee
+# aca, con la misma sintaxis que .gitignore. wrangler.toml apunta
+# [assets] directory = "." (todo el repo), asi que sin este archivo el
+# Worker publica docs/ (que incluye el spec interno con detalles que el
+# portafolio deliberadamente no dice en publico), tests/ y los archivos de
+# configuracion/documentacion del propio repo.
+docs/
+tests/
+.superpowers/
+README.md
+wrangler.toml
+.gitignore
+.assetsignore

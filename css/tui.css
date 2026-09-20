@@ -1,0 +1,132 @@
+.sistema {
+  display: grid;
+  grid-template-areas: "titulo titulo" "menu panel" "estado estado";
+  grid-template-columns: minmax(9rem, 14rem) 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  gap: 0;
+  border: 1px solid var(--fosforo-tenue);
+}
+
+.barra-titulo {
+  grid-area: titulo;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--fosforo-tenue);
+  font-size: 0.85rem;
+  color: var(--ambar);
+}
+
+.menu {
+  grid-area: menu;
+  border-right: 1px solid var(--fosforo-tenue);
+  padding: 0.5rem 0;
+  overflow: auto;
+}
+.menu button {
+  display: block; width: 100%;
+  font: inherit; text-align: left;
+  color: var(--fosforo-tenue);
+  background: transparent; border: none;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* LinkedIn en azul, por ser lo que es. No el azul de marca (#0a66c2, 3.27:1
+   sobre este fondo) ni el del navegador (1.98:1): un azul cielo que se lee. */
+.panel a[href*="linkedin"] { color: var(--azul); }
+.menu button::before { content: "  "; white-space: pre; }
+.menu button[aria-current="true"] { color: var(--fondo); background: var(--fosforo); }
+.menu button[aria-current="true"]::before { content: "> "; }
+.menu button:hover:not([aria-current="true"]) { color: var(--fosforo); }
+.menu button:focus-visible { outline: 2px solid var(--acento); outline-offset: -2px; }
+
+.panel { grid-area: panel; padding: 1rem 1.2rem; overflow: auto; }
+.panel h2 { margin: 0 0 1rem; font-size: 1rem; color: var(--ambar); letter-spacing: 0.1em; }
+.panel p { max-width: 68ch; }
+
+.barra-estado {
+  grid-area: estado;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0.8rem;
+  border-top: 1px solid var(--fosforo-tenue);
+  font-size: 0.78rem;
+  color: var(--fosforo-tenue);
+}
+.barra-estado button {
+  font: inherit; color: var(--fosforo-tenue);
+  background: transparent; border: 1px solid transparent;
+  cursor: pointer; padding: 0.25rem 0.5rem;
+  min-height: 44px;
+}
+.barra-estado button:hover {
+  color: var(--fosforo); border-color: var(--fosforo-tenue);
+}
+.barra-estado button:focus-visible {
+  color: var(--fosforo); border-color: var(--fosforo-tenue);
+  outline: 2px solid var(--acento);
+}
+
+.lista-archivos { list-style: none; margin: 0; padding: 0; }
+.lista-archivos li { margin-bottom: 0.3rem; }
+.lista-archivos button {
+  display: flex; gap: 1rem; width: 100%;
+  font: inherit; text-align: left;
+  color: var(--fosforo); background: transparent;
+  border: 1px solid var(--fosforo-tenue);
+  padding: 0.7rem 0.9rem; cursor: pointer;
+  min-height: 44px;
+}
+.lista-archivos button:hover, .lista-archivos button:focus-visible,
+.lista-archivos button[data-foco="true"] {
+  color: var(--fondo); background: var(--fosforo); outline: none;
+}
+.etiqueta-archivo { color: var(--acento); flex-shrink: 0; }
+.lista-archivos button:hover .etiqueta-archivo,
+.lista-archivos button[data-foco="true"] .etiqueta-archivo { color: var(--fondo); }
+
+.detalle { border: 1px solid var(--acento); padding: 1rem; }
+.detalle .stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.detalle .stack span { border: 1px solid var(--fosforo-tenue); padding: 0.15rem 0.5rem; font-size: 0.8rem; }
+
+/* Todo enlace dentro del panel (el de un detalle de archivo, los de
+   LinkedIn/GitHub en CONTACTO) usa el acento, no el azul por defecto del
+   navegador: sobre --fondo, el azul da 2.12:1 (1.81:1 visitado) y el
+   acento da 7.39:1. inline-flex + min-height da un area tactil de 44px sin
+   forzar el interlineado del texto que envuelve. */
+.panel a {
+  color: var(--acento);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.proceso { border-left: 2px solid var(--fosforo-tenue); padding-left: 0.9rem; margin-bottom: 1.2rem; }
+.proceso .estado { color: var(--ambar); font-size: 0.8rem; }
+
+.grupo-stack { margin-bottom: 1.2rem; }
+.grupo-stack h3 { margin: 0 0 0.4rem; font-size: 0.85rem; color: var(--ambar); }
+
+.evento { margin-bottom: 1.2rem; }
+.evento .periodo { color: var(--fosforo-tenue); font-size: 0.8rem; }
+.evento h3 { margin: 0.1rem 0 0.3rem; font-size: 0.95rem; }
+
+/* Celular: el menu lateral pasa a pestanas arriba. */
+@media (max-width: 42rem) {
+  .sistema {
+    grid-template-areas: "titulo" "menu" "panel" "estado";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+  }
+  .menu {
+    display: flex; overflow-x: auto;
+    border-right: none; border-bottom: 1px solid var(--fosforo-tenue);
+    padding: 0;
+  }
+  .menu button { width: auto; white-space: nowrap; padding: 0.6rem 0.9rem; }
+  .menu button::before { content: ""; }
+  .barra-estado { font-size: 0.7rem; }
+  .barra-estado .teclas { display: none; }
+}
