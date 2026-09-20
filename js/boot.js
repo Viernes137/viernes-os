@@ -68,12 +68,20 @@ function preguntar({ contenedor, contenido, idioma, reducirMovimiento, botonSalt
         <button type="button" class="opcion" data-respuesta="no">N — NO</button>
       </div>`;
     contenedor.append(bloque);
-    bloque.querySelector('[data-respuesta="si"]').focus();
+    const botonSi = bloque.querySelector('[data-respuesta="si"]');
+    const botonNo = bloque.querySelector('[data-respuesta="no"]');
+    botonSi.focus();
+
+    let resuelta = false;
 
     const teclasSi = idioma === 'es' ? ['s', 'S'] : ['y', 'Y'];
     const alTeclado = (evento) => {
-      if (teclasSi.includes(evento.key) || evento.key === 'Enter') responder('si');
+      // Enter/Space sobre un boton enfocado ya disparan su propio click nativo:
+      // dejamos que ese click responda, para no contestar dos veces la misma tecla.
+      const enfocadoEsBoton = document.activeElement === botonSi || document.activeElement === botonNo;
+      if (teclasSi.includes(evento.key)) responder('si');
       else if (evento.key === 'n' || evento.key === 'N') responder('no');
+      else if (evento.key === 'Enter' && !enfocadoEsBoton) responder('si');
     };
     document.addEventListener('keydown', alTeclado);
 
@@ -83,6 +91,8 @@ function preguntar({ contenedor, contenido, idioma, reducirMovimiento, botonSalt
     });
 
     async function responder(respuesta) {
+      if (resuelta) return;
+      resuelta = true;
       document.removeEventListener('keydown', alTeclado);
       if (respuesta === 'si') {
         bloque.remove();
