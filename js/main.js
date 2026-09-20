@@ -12,6 +12,13 @@ const reducirMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches
 let idioma = detectarIdioma(navigator.languages ?? [navigator.language], leer(CLAVE_IDIOMA));
 let tui = null;
 
+// El idioma se resuelve antes de mostrar nada: el atributo lang del documento
+// debe coincidir con el idioma real desde la primera linea del arranque, no
+// solo al entrar al sistema (si no, un lector de pantalla pronuncia el POST
+// y el "hello, world" en ingles con el idioma marcado como espanol, o
+// viceversa).
+document.documentElement.lang = idioma;
+
 const faseArranque = document.getElementById('fase-arranque');
 const faseSistema = document.getElementById('fase-sistema');
 
