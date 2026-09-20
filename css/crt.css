@@ -5,7 +5,12 @@
 
   --fondo: #050a08;
   --fosforo: #6bffc8;
-  --fosforo-tenue: #3d8f74;
+  /* Levantado desde #3d8f74: ese tono, compuesto con las scanlines (que lo
+     pintan encima incluso en el centro del panel), quedaba en 4.41:1 a
+     crt:1 — por debajo del minimo de 4.5:1 — y es el color del menu sin
+     seleccionar, la barra de estado y las fechas de trayectoria. Ver el
+     script de contraste del reporte de la ola de arreglos. */
+  --fosforo-tenue: #4fa88b;
   --acento: #ff5ed2;
   --ambar: #ffcc66;
 
@@ -72,11 +77,16 @@ html, body {
   );
 }
 
-/* Vineta: el tubo se oscurece en los bordes. */
+/* Vineta: el tubo se oscurece en los bordes. z-index:1, DETRAS de
+   .contenido (z-index:2): asi solo oscurece el fondo que se transparenta a
+   traves del panel, nunca el texto. Con z-index:4 (por encima de todo)
+   oscurecia tambien las letras hacia los bordes, hasta dejar el menu, la
+   barra de estado y "saltar intro" (que usan --fosforo-tenue) por debajo
+   del contraste minimo. */
 .capa-vineta {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 1;
   pointer-events: none;
   opacity: var(--crt);
   background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.75) 100%);
